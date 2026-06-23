@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>bridgex</name>
+  <version>1.0.6</version>
+  <description>A simple ROS bridge node for message processing and forwarding with ZMQ support</description>
+
+  <!-- 维护者信息 -->
+  <maintainer email="developer@example.com">Developer</maintainer>
+  <license>MIT</license>
+
+  <!-- 构建工具依赖 -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- 构建依赖 -->
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>base_switch_map</depend>
+  <depend>nav_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>move_base_msgs</depend>
+  <depend>actionlib</depend>
+  <depend>tf</depend>
+  <depend>libzmq3-dev</depend>
+  <depend>libjsoncpp-dev</depend>
+
+  <export>
+  </export>
+</package>
