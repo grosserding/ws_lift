@@ -1,0 +1,9 @@
+<launch>
+    <node pkg="lift_comm" type="lift_controller.py" name="lift_controller" output="screen">
+        <param name="port"     value="/dev/ttyUSB0" />
+        <param name="baudrate" value="9600" />
+        <param name="robot_id" value="1" />
+        <param name="bnk"      value="0" />
+        <param name="nod"      value="0" />
+    </node>
+</launch>

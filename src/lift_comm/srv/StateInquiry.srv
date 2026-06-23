@@ -1,0 +1,7 @@
+# Request
+bool state_inquiry
+---
+# Response
+bool door_open
+uint8 current_floor
+uint8 up_down_state

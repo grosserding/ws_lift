@@ -1,0 +1,125 @@
+# ################################
+# 通用 C++ 工程
+# ################################
+
+# 编译中间文件
+*.o
+*.obj
+*.d
+*.depend
+*.mod
+
+# 生成的可执行文件
+*.exe
+*.out
+*.app
+
+# 静态库与动态库
+*.lib
+*.dll
+*.so
+*.so.*
+*.a
+*.dylib
+
+# 调试符号文件
+*.dSYM/
+*.pdb
+*.idb
+
+# CMake 构建目录
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+compile_commands.json
+*.cmake
+!CMakeLists.txt
+
+# 其他构建工具
+_deps/
+*.ninja
+.ninja_deps
+.ninja_log
+
+# 日志文件
+*.log
+
+# 打包文件
+*.tar
+*.tar.gz
+*.zip
+*.7z
+
+# IDE 配置（个人偏好，可按需调整）
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.cproject
+.settings/
+*.code-workspace
+.DS_Store
+
+# ################################
+# ROS1 工程 (catkin)
+# ################################
+
+# 工作空间构建目录
+devel/
+build/
+logs/
+. catkin_workspace
+.catkin_tools/
+
+# 安装空间
+install/
+install_isolated/
+
+# 环境设置脚本（通常不需要版本控制，除非自定义）
+setup.bash
+setup.sh
+setup.zsh
+_setup_util.py
+
+# 消息/服务/动作生成的文件（一般不提交）
+devel/include/**/*.h
+devel/lib/python*/dist-packages/**/*.py
+
+# ################################
+# ROS2 工程 (colcon)
+# ################################
+
+# 构建、安装、日志目录
+build/
+install/
+log/
+
+# colcon 混合构建目录
+colcon_ws/
+__pycache__/
+*.pyc
+
+# 特定于 ROS2 的缓存/元数据
+.colcon/
+.ros2/
+COLCON_IGNORE
+
+# 测试与覆盖率
+*.pytest_cache/
+.coverage
+htmlcov/
+
+# ################################
+# 其他常见工程临时文件
+# ################################
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+*.swp
