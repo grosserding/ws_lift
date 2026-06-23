@@ -1,0 +1,3 @@
+[submodule "src/robotpro"]
+	path = src/robotpro
+	url = git@192.168.0.44:CETC_Intelligent_Sensing/robotpro.git
