@@ -1,0 +1,113 @@
+{
+    "advanced_areas": [],
+    "areas": [],
+    "description": "",
+    "landmarks": [
+        {
+            "function": "default_reloc",
+            "id": 1,
+            "position": {
+                "x": 1.5622,
+                "y": 65.2342,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 0.0194
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 2,
+            "position": {
+                "x": 4.655682403564453,
+                "y": 65.27371568603516,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 0.014371451648965897
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 3,
+            "position": {
+                "x": 7.968456268310547,
+                "y": 65.18702697753906,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 0.0061
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 4,
+            "position": {
+                "x": -16.857118606567383,
+                "y": 52.59128189086914,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -3.1143480944749062
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 5,
+            "position": {
+                "x": -0.7328878045082092,
+                "y": 0.37360522150993347,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -0.04191081004071946
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 6,
+            "position": {
+                "x": -17.626850128173828,
+                "y": 14.429309844970703,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 1.6061142800454031
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 7,
+            "position": {
+                "x": 7.968456268310547,
+                "y": 65.18702697753906,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -3.1354810728789517
+            },
+            "type": "WP"
+        }
+    ],
+    "version": ""
+}

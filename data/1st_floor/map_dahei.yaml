@@ -1,0 +1,6 @@
+image: map_dahei.pgm
+resolution: 0.05
+origin: [-300, -300, 0.0]
+occupied_thresh: 0.5
+free_thresh: 0.2
+negate: 0

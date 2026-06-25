@@ -1,0 +1,413 @@
+{
+    "advanced_areas": [],
+    "areas": [],
+    "description": "",
+    "landmarks": [
+        {
+            "function": "way point",
+            "id": 1,
+            "position": {
+                "x": -255.3475,
+                "y": -56.1229,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -1.4737000000000002
+            },
+            "type": "WP"
+        },
+        {
+            "function": "default_reloc",
+            "id": 2,
+            "position": {
+                "x": -9.817475663952955,
+                "y": 16.352344944800656,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -3.0157437392847304
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 3,
+            "position": {
+                "x": -53.14835739135742,
+                "y": 13.894329071044922,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -1.3986920780477228
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 4,
+            "position": {
+                "x": -59.98102661132812,
+                "y": 9.984296913146974,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -3.01924
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 5,
+            "position": {
+                "x": -97.15239715576172,
+                "y": 4.739772796630859,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -3.0410999215433407
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 6,
+            "position": {
+                "x": -96.57404327392578,
+                "y": -1.7034523487091064,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -1.4425911420877648
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 7,
+            "position": {
+                "x": -96.02102661132813,
+                "y": -6.364296913146973,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -1.515382443612902
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 8,
+            "position": {
+                "x": -130.16374611103896,
+                "y": -35.88345284216602,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -1.4498616418363952
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 9,
+            "position": {
+                "x": -122.71385192871094,
+                "y": -42.964149475097656,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -2.1240461934301647
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 10,
+            "position": {
+                "x": -144.1538543701172,
+                "y": -50.28071594238281,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -3.0196995825691753
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 11,
+            "position": {
+                "x": -143.99806213378906,
+                "y": -60.618507385253906,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -2.9966714698061665
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 12,
+            "position": {
+                "x": -228.42269897460938,
+                "y": -68.58319091796875,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -3.0295
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 13,
+            "position": {
+                "x": -246.95115661621094,
+                "y": -71.21112823486328,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -3.0077
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 14,
+            "position": {
+                "x": -254.60098266601563,
+                "y": -62.59861373901367,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 1.6884296078218675
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 15,
+            "position": {
+                "x": -254.76101684570313,
+                "y": -59.46322250366211,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -1.5103573275636588
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 16,
+            "position": {
+                "x": -254.60098266601563,
+                "y": -62.59861373901367,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": -1.4531
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 17,
+            "position": {
+                "x": -246.95115661621094,
+                "y": -71.21112823486328,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 0.13397064551045995
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 18,
+            "position": {
+                "x": -228.42269897460938,
+                "y": -68.58319091796875,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 0.11217984761917309
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 19,
+            "position": {
+                "x": -144.58135530669898,
+                "y": -59.40044328048872,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 1.7011996346840303
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 20,
+            "position": {
+                "x": -145.44024658203125,
+                "y": -51.999107360839844,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 1.7257824365252936
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 21,
+            "position": {
+                "x": -131.8477325439453,
+                "y": -49.88384246826172,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 1.7043932959454349
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 22,
+            "position": {
+                "x": -133.74322509765625,
+                "y": -37.14614486694336,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 0.09844052800676842
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 23,
+            "position": {
+                "x": -96.02102661132813,
+                "y": -6.364296913146973,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 1.6262000000000003
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 24,
+            "position": {
+                "x": -96.79998779296875,
+                "y": 1.2478598356246948,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 1.6791643792055249
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 25,
+            "position": {
+                "x": -91.77361297607422,
+                "y": 8.43031120300293,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 0.08087437248595528
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 26,
+            "position": {
+                "x": -31.5802059173584,
+                "y": 15.555940628051758,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 0.10368548832867469
+            },
+            "type": "WP"
+        },
+        {
+            "function": "way point",
+            "id": 27,
+            "position": {
+                "x": -2.838688611984253,
+                "y": 15.004114151000977,
+                "z": 0.0
+            },
+            "rotation": {
+                "pitch": 0.0,
+                "roll": 0.0,
+                "yaw": 0.062014272369271345
+            },
+            "type": "WP"
+        }
+    ],
+    "version": ""
+}
