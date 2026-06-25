@@ -50,8 +50,12 @@ class LiftController:
         period = 1.0 / rate
         while not rospy.is_shutdown():
             if self._door_hold_active.is_set():
+                rospy.loginfo_throttle(5, "【485】持续开门中（周期性按开门键）")
                 self.elevator.control_front_door(True)
-                rospy.sleep(period)
+                try:
+                    rospy.sleep(period)
+                except rospy.ROSInterruptException:
+                    break
             else:
                 # 未激活时低频空转，等待被激活或检查退出
                 self._door_hold_active.wait(timeout=0.5)

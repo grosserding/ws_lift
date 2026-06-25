@@ -1078,13 +1078,18 @@ void ExClient::WpOccupiedCallback(const std_msgs::Bool::ConstPtr &msg) {
 
 std::string ExClient::HandleLiftCall(const nlohmann::json &request) {
   if (!lift_call_client_) {
+    LOG(ERROR) << "HandleLiftCall: lift call client not ready";
     return PackMsg(false, "lift call client not ready");
   }
+  int floor = request.value("floor", 0);
   lift_comm::LiftCall srv;
-  srv.request.target_floor = static_cast<uint8_t>(request.value("floor", 0));
+  srv.request.target_floor = static_cast<uint8_t>(floor);
+  LOG(INFO) << "HandleLiftCall: requesting elevator to floor " << floor;
   if (!lift_call_client_.call(srv)) {
+    LOG(ERROR) << "HandleLiftCall: /lift/call service call failed (floor=" << floor << ")";
     return PackMsg(false, "lift call service call failed");
   }
+  LOG(INFO) << "HandleLiftCall: floor=" << floor << " success=" << (srv.response.success ? "true" : "false");
   nlohmann::json response;
   response["status"] = srv.response.success;
   response["message"] = srv.response.success ? "lift call ok" : "lift call rejected";
@@ -1094,11 +1099,13 @@ std::string ExClient::HandleLiftCall(const nlohmann::json &request) {
 
 std::string ExClient::HandleLiftState() {
   if (!lift_state_client_) {
+    LOG(ERROR) << "HandleLiftState: lift state client not ready";
     return PackMsg(false, "lift state client not ready");
   }
   lift_comm::StateInquiry srv;
   srv.request.state_inquiry = true;
   if (!lift_state_client_.call(srv)) {
+    LOG(WARNING) << "HandleLiftState: /lift/state_inquiry service call failed";
     return PackMsg(false, "lift state service call failed");
   }
   nlohmann::json response;
@@ -1113,13 +1120,19 @@ std::string ExClient::HandleLiftState() {
 
 std::string ExClient::HandleLiftDoor(const nlohmann::json &request) {
   if (!lift_hodor_client_) {
+    LOG(ERROR) << "HandleLiftDoor: lift hodor client not ready";
     return PackMsg(false, "lift hodor client not ready");
   }
+  bool open = request.value("open", false);
   lift_comm::Hodor srv;
-  srv.request.hodor = request.value("open", false);
+  srv.request.hodor = open;
+  LOG(INFO) << "HandleLiftDoor: " << (open ? "open(hold)" : "close(stop hold)");
   if (!lift_hodor_client_.call(srv)) {
+    LOG(ERROR) << "HandleLiftDoor: /lift/hodor service call failed (open=" << (open ? "true" : "false") << ")";
     return PackMsg(false, "lift hodor service call failed");
   }
+  LOG(INFO) << "HandleLiftDoor: " << (open ? "open" : "close")
+            << " success=" << (srv.response.success ? "true" : "false");
   nlohmann::json response;
   response["status"] = srv.response.success;
   response["message"] = srv.response.success ? "lift door ok" : "lift door failed";

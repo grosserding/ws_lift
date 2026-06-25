@@ -433,8 +433,14 @@ bool TaskManager::LiftCallOnce(int floor) {
   std::string resp = ex_client_.ProcessRequest(req.dump());
   try {
     nlohmann::json j = nlohmann::json::parse(resp);
-    return j.value("status", false);
-  } catch (const nlohmann::json::exception&) {
+    bool ok = j.value("status", false);
+    if (!ok) {
+      LOG(WARNING) << "Elevator: lift call to floor " << floor
+                   << " not accepted: " << j.value("message", std::string("unknown"));
+    }
+    return ok;
+  } catch (const nlohmann::json::exception& e) {
+    LOG(WARNING) << "Elevator: failed to parse lift call response: " << e.what();
     return false;
   }
 }
@@ -513,6 +519,7 @@ bool TaskManager::ElevatorGoToFloor(int floor, std::string& error_msg) {
       elevator_status_query_rate_hz_ > 0 ? static_cast<int>(1000.0 / elevator_status_query_rate_hz_) : 200;
   // 强制首次立即呼梯
   auto last_call = std::chrono::steady_clock::now() - std::chrono::hours(1);
+  int last_logged_floor = -999;  // 楼层变化时打印，避免高频刷屏
   while (is_running_ && !should_cancel_) {
     if (is_paused_) {
       std::unique_lock lock(task_mutex_);
@@ -523,19 +530,27 @@ bool TaskManager::ElevatorGoToFloor(int floor, std::string& error_msg) {
     }
     auto now = std::chrono::steady_clock::now();
     if (now - last_call >= std::chrono::milliseconds(call_period_ms)) {
+      LOG(INFO) << "Elevator: sending call to floor " << floor;
       LiftCallOnce(floor);
       last_call = now;
     }
     int current_floor = -1;
-    if (QueryLiftFloor(current_floor) && current_floor == floor) {
-      LOG(INFO) << "Elevator arrived at floor " << floor;
-      return true;
+    if (QueryLiftFloor(current_floor)) {
+      if (current_floor != last_logged_floor) {
+        LOG(INFO) << "Elevator: current floor = " << current_floor << " (waiting for " << floor << ")";
+        last_logged_floor = current_floor;
+      }
+      if (current_floor == floor) {
+        LOG(INFO) << "Elevator arrived at floor " << floor;
+        return true;
+      }
     }
     if (!InterruptibleSleep(query_period_ms)) {
       break;
     }
   }
   error_msg = "Elevator call cancelled";
+  LOG(INFO) << "Elevator: call/wait for floor " << floor << " cancelled";
   return false;
 }
 
@@ -545,6 +560,9 @@ bool TaskManager::ElevatorComeToFloor(int floor, std::string& error_msg) {
   const int occ_period_ms =
       elevator_occupied_check_rate_hz_ > 0 ? static_cast<int>(1000.0 / elevator_occupied_check_rate_hz_) : 100;
 
+  LOG(INFO) << "Elevator come: start, target floor " << floor
+            << " (judge_start_delay=" << elevator_judge_start_delay_ms_ << "ms, judge_window="
+            << elevator_judge_window_ms_ << "ms)";
   while (is_running_ && !should_cancel_) {
     // 步骤a：呼梯直到电梯到达本层
     if (!ElevatorGoToFloor(floor, error_msg)) {
@@ -553,7 +571,10 @@ bool TaskManager::ElevatorComeToFloor(int floor, std::string& error_msg) {
 
     // 到层后立即按一次开门，保证判断期间门开着（能感知舱内占据）
     std::string door_err;
-    SetLiftDoor(true, door_err);
+    LOG(INFO) << "Elevator come: arrived at floor " << floor << ", opening door for occupancy judging";
+    if (!SetLiftDoor(true, door_err)) {
+      LOG(WARNING) << "Elevator come: open door failed: " << door_err;
+    }
 
     // 起始判断时间：等门完全打开
     bool delay_ok = InterruptibleSleep(elevator_judge_start_delay_ms_);
@@ -561,9 +582,13 @@ bool TaskManager::ElevatorComeToFloor(int floor, std::string& error_msg) {
     // 判断窗口：持续采样占据，窗口内出现占据即判定为占据（门保持开到窗口结束）
     bool occupied = false;
     if (delay_ok) {
+      LOG(INFO) << "Elevator come: judging occupancy of cabin waypoint for " << elevator_judge_window_ms_ << "ms";
       auto window_end = std::chrono::steady_clock::now() + std::chrono::milliseconds(elevator_judge_window_ms_);
       while (std::chrono::steady_clock::now() < window_end && is_running_ && !should_cancel_) {
         if (IsWpOccupied()) {
+          if (!occupied) {
+            LOG(INFO) << "Elevator come: cabin waypoint detected OCCUPIED during judge window";
+          }
           occupied = true;
         }
         if (!InterruptibleSleep(occ_period_ms)) {
@@ -573,24 +598,29 @@ bool TaskManager::ElevatorComeToFloor(int floor, std::string& error_msg) {
     }
 
     // 窗口结束（或被取消）后关门
-    SetLiftDoor(false, door_err);
+    LOG(INFO) << "Elevator come: judge window ended (occupied=" << (occupied ? "true" : "false")
+              << "), closing door";
+    if (!SetLiftDoor(false, door_err)) {
+      LOG(WARNING) << "Elevator come: close door failed: " << door_err;
+    }
 
     if (!is_running_ || should_cancel_) {
       error_msg = "Elevator come cancelled";
+      LOG(INFO) << "Elevator come: cancelled at floor " << floor;
       return false;
     }
 
     if (!occupied) {
-      LOG(INFO) << "Elevator at floor " << floor << " is enterable, come action done";
+      LOG(INFO) << "Elevator come: floor " << floor << " cabin is enterable, come action done";
       return true;
     }
 
     // 占据：放弃本次进梯，等电梯离开本层后再回到步骤a重新呼梯
-    LOG(INFO) << "Elevator at floor " << floor << " is occupied, waiting it to leave";
+    LOG(INFO) << "Elevator come: floor " << floor << " cabin occupied, abandon this entry, waiting elevator to leave";
     while (is_running_ && !should_cancel_) {
       int current_floor = -1;
       if (QueryLiftFloor(current_floor) && current_floor != floor) {
-        LOG(INFO) << "Elevator left floor " << floor << ", re-calling";
+        LOG(INFO) << "Elevator come: elevator left floor " << floor << ", re-calling";
         break;
       }
       if (!InterruptibleSleep(query_period_ms)) {
@@ -599,28 +629,39 @@ bool TaskManager::ElevatorComeToFloor(int floor, std::string& error_msg) {
     }
   }
   error_msg = "Elevator come cancelled";
+  LOG(INFO) << "Elevator come: cancelled (target floor " << floor << ")";
   return false;
 }
 
 bool TaskManager::ExecuteElevator(const ElevatorParam& param, std::string& error_msg) {
   LOG(INFO) << "Executing elevator action: op=" << param.op << " mode=" << param.mode << " floor=" << param.floor;
   if (param.op == "open_door") {
-    return SetLiftDoor(true, error_msg);
+    bool ok = SetLiftDoor(true, error_msg);
+    LOG(INFO) << "Elevator open_door " << (ok ? "done" : ("failed: " + error_msg));
+    return ok;
   }
   if (param.op == "close_door") {
-    return SetLiftDoor(false, error_msg);
+    bool ok = SetLiftDoor(false, error_msg);
+    LOG(INFO) << "Elevator close_door " << (ok ? "done" : ("failed: " + error_msg));
+    return ok;
   }
   if (param.op == "call") {
     if (param.mode == "go") {
-      return ElevatorGoToFloor(param.floor, error_msg);
+      bool ok = ElevatorGoToFloor(param.floor, error_msg);
+      LOG(INFO) << "Elevator ride(go) to floor " << param.floor << " " << (ok ? "done" : ("failed: " + error_msg));
+      return ok;
     }
     if (param.mode == "come") {
-      return ElevatorComeToFloor(param.floor, error_msg);
+      bool ok = ElevatorComeToFloor(param.floor, error_msg);
+      LOG(INFO) << "Elevator call(come) to floor " << param.floor << " " << (ok ? "done" : ("failed: " + error_msg));
+      return ok;
     }
     error_msg = "Unknown elevator mode: " + param.mode;
+    LOG(ERROR) << "Elevator: " << error_msg;
     return false;
   }
   error_msg = "Unknown elevator op: " + param.op;
+  LOG(ERROR) << "Elevator: " << error_msg;
   return false;
 }
 
