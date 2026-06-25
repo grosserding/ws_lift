@@ -25,6 +25,10 @@
 #include <std_msgs/Float32.h>
 #include <std_srvs/Empty.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
+#include <lift_comm/LiftCall.h>
+#include <lift_comm/StateInquiry.h>
+#include <lift_comm/Hodor.h>
 namespace bridgex {
 
 class ExClient {
@@ -68,6 +72,15 @@ class ExClient {
   // 地图切换
   ros::ServiceClient loc_map_change_client_;
   ros::ServiceClient nav_map_change_client_;
+  // 梯控服务（与 lift_comm 通信）
+  ros::ServiceClient lift_call_client_;
+  ros::ServiceClient lift_state_client_;
+  ros::ServiceClient lift_hodor_client_;
+  // 目标点被占据状态（导航发布 /wp_occupied）
+  ros::Subscriber wp_occupied_sub_;
+  bool wp_occupied_{false};
+  ros::Time wp_occupied_stamp_;
+  std::mutex wp_occupied_mutex_;
   // 定位相关
   ros::Subscriber loc_sub_;
   ros::Subscriber amcl_sub_;
@@ -154,6 +167,16 @@ class ExClient {
   std::string HandleBagRecording(const nlohmann::json &request);
 
   std::string HandleMapping(const nlohmann::json &request) const;
+
+  std::string HandleLiftCall(const nlohmann::json &request);
+
+  std::string HandleLiftState();
+
+  std::string HandleLiftDoor(const nlohmann::json &request);
+
+  std::string HandleWpOccupied();
+
+  void WpOccupiedCallback(const std_msgs::Bool::ConstPtr &msg);
 
   void LocCallback(const nav_msgs::Odometry::ConstPtr &msg);
 

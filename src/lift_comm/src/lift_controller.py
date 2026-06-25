@@ -10,6 +10,7 @@ lift_controller.py
 3. /lift/hodor          Hodor            导航请求按开门键
 """
 
+import threading
 import rospy
 from lift_comm.srv import LiftCall, LiftCallResponse
 from lift_comm.srv import StateInquiry, StateInquiryResponse
@@ -31,11 +32,29 @@ class LiftController:
         )
         rospy.loginfo("电梯通信模块初始化成功")
 
+        # 持续开门控制：收到 hodor=true 后由后台线程周期性按开门键，
+        # 收到 hodor=false 后停止。重按频率可通过参数 ~door_hold_rate_hz 调整。
+        self.door_hold_rate_hz = float(rospy.get_param("~door_hold_rate_hz", 1.0))
+        self._door_hold_active = threading.Event()
+        self._door_hold_thread = threading.Thread(target=self._door_hold_loop, daemon=True)
+        self._door_hold_thread.start()
+
         rospy.Service("/lift/call", LiftCall, self.handle_call)
         rospy.Service("/lift/state_inquiry", StateInquiry, self.handle_state_inquiry)
         rospy.Service("/lift/hodor", Hodor, self.handle_hodor)
 
         rospy.loginfo("====== 梯控节点启动完成 ======")
+
+    def _door_hold_loop(self):
+        rate = self.door_hold_rate_hz if self.door_hold_rate_hz > 0 else 1.0
+        period = 1.0 / rate
+        while not rospy.is_shutdown():
+            if self._door_hold_active.is_set():
+                self.elevator.control_front_door(True)
+                rospy.sleep(period)
+            else:
+                # 未激活时低频空转，等待被激活或检查退出
+                self._door_hold_active.wait(timeout=0.5)
 
     # ===============================
     # /lift/call
@@ -94,15 +113,21 @@ class LiftController:
     # /lift/hodor
     # ===============================
     def handle_hodor(self, req):
-        rospy.loginfo("收到开门请求")
-
-        result = self.elevator.control_front_door(True)
-        success = result is not None
-
-        if success:
-            rospy.loginfo("【485】开门命令发送成功")
+        # hodor=True  -> 启动持续开门（后台线程周期性按开门键）
+        # hodor=False -> 停止持续开门
+        if req.hodor:
+            rospy.loginfo("收到持续开门请求，启动持续开门")
+            result = self.elevator.control_front_door(True)
+            self._door_hold_active.set()
+            success = result is not None
+            if success:
+                rospy.loginfo("【485】开门命令发送成功，已开启持续开门")
+            else:
+                rospy.logerr("【485】开门命令发送失败")
         else:
-            rospy.logerr("【485】开门命令发送失败")
+            rospy.loginfo("收到停止开门请求，停止持续开门")
+            self._door_hold_active.clear()
+            success = True
 
         return HodorResponse(success)
 

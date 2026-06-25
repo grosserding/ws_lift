@@ -4,6 +4,20 @@
             "actions": [
                 {
                     "param": {
+                        "floor": 1,
+                        "mode": "come",
+                        "op": "call"
+                    },
+                    "type": 5
+                },
+                {
+                    "param": {
+                        "op": "open_door"
+                    },
+                    "type": 5
+                },
+                {
+                    "param": {
                         "name": "WP2",
                         "qW": 0.9999741827832765,
                         "qX": 0.0,
@@ -17,6 +31,26 @@
                 },
                 {
                     "param": {
+                        "op": "close_door"
+                    },
+                    "type": 5
+                },
+                {
+                    "param": {
+                        "floor": 3,
+                        "mode": "go",
+                        "op": "call"
+                    },
+                    "type": 5
+                },
+                {
+                    "param": {
+                        "op": "open_door"
+                    },
+                    "type": 5
+                },
+                {
+                    "param": {
                         "name": "WP3",
                         "qW": 0.9999953487536057,
                         "qX": 0.0,
@@ -27,6 +61,12 @@
                         "z": 0.0
                     },
                     "type": 1
+                },
+                {
+                    "param": {
+                        "op": "close_door"
+                    },
+                    "type": 5
                 },
                 {
                     "param": {

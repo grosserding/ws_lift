@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   base_switch_map
   tf
+  lift_comm
   message_generation
 )
 add_subdirectory(src/thirdparty/log)
@@ -47,7 +48,7 @@ if(ZMQ_VERSION)
 endif()
 
 catkin_package(
-  CATKIN_DEPENDS roscpp std_msgs std_srvs nav_msgs geometry_msgs move_base_msgs actionlib tf
+  CATKIN_DEPENDS roscpp std_msgs std_srvs nav_msgs geometry_msgs move_base_msgs actionlib tf lift_comm
   LIBRARIES ${PROJECT_NAME}
 )
 # BridgeX节点（包含ZMQ管理功能）

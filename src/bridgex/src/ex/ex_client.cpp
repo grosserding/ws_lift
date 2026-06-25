@@ -85,6 +85,13 @@ void ExClient::InitROS() {
   loc_map_change_client_ = nh_.serviceClient<base_switch_map::Base_switch_map_srv>("map_switch_service", true);
   nav_map_change_client_ = nh_.serviceClient<nav_msgs::LoadMap>("change_map", true);
 
+  // 梯控服务
+  lift_call_client_ = nh_.serviceClient<lift_comm::LiftCall>("/lift/call");
+  lift_state_client_ = nh_.serviceClient<lift_comm::StateInquiry>("/lift/state_inquiry");
+  lift_hodor_client_ = nh_.serviceClient<lift_comm::Hodor>("/lift/hodor");
+  // 目标点被占据状态
+  wp_occupied_sub_ = nh_.subscribe("wp_occupied", 1, &ExClient::WpOccupiedCallback, this);
+
   loc_sub_ = nh_.subscribe("odom", 1, &ExClient::LocCallback, this);
   amcl_sub_ = nh_.subscribe("amcl_pose", 1, &ExClient::AmclCallback, this);
   pointcloud_sub_ = nh_.subscribe("lidar_fusion_pcl", 1, &ExClient::PointCloudCallback, this);
@@ -310,6 +317,14 @@ std::string ExClient::ProcessRequest(const std::string &json_str) {
       return HandleBagRecording(request);
     } else if (msg_type == "Mapping") {
       return HandleMapping(request);
+    } else if (msg_type == "LiftCall") {
+      return HandleLiftCall(request);
+    } else if (msg_type == "LiftState") {
+      return HandleLiftState();
+    } else if (msg_type == "LiftDoor") {
+      return HandleLiftDoor(request);
+    } else if (msg_type == "WpOccupied") {
+      return HandleWpOccupied();
     } else {
       return PackMsg(false, "unknown message type");
     }
@@ -1051,6 +1066,82 @@ std::string ExClient::HandleMapping(const nlohmann::json &request) const
   nlohmann::json response;
   response["status"] = true;
   response["message"] = result;
+  response["timeStamp"] = ros::Time::now().toSec();
+  return response.dump();
+}
+
+void ExClient::WpOccupiedCallback(const std_msgs::Bool::ConstPtr &msg) {
+  std::lock_guard lock(wp_occupied_mutex_);
+  wp_occupied_ = msg->data;
+  wp_occupied_stamp_ = ros::Time::now();
+}
+
+std::string ExClient::HandleLiftCall(const nlohmann::json &request) {
+  if (!lift_call_client_) {
+    return PackMsg(false, "lift call client not ready");
+  }
+  lift_comm::LiftCall srv;
+  srv.request.target_floor = static_cast<uint8_t>(request.value("floor", 0));
+  if (!lift_call_client_.call(srv)) {
+    return PackMsg(false, "lift call service call failed");
+  }
+  nlohmann::json response;
+  response["status"] = srv.response.success;
+  response["message"] = srv.response.success ? "lift call ok" : "lift call rejected";
+  response["timeStamp"] = ros::Time::now().toSec();
+  return response.dump();
+}
+
+std::string ExClient::HandleLiftState() {
+  if (!lift_state_client_) {
+    return PackMsg(false, "lift state client not ready");
+  }
+  lift_comm::StateInquiry srv;
+  srv.request.state_inquiry = true;
+  if (!lift_state_client_.call(srv)) {
+    return PackMsg(false, "lift state service call failed");
+  }
+  nlohmann::json response;
+  response["status"] = true;
+  response["message"] = "lift state ok";
+  response["doorOpen"] = srv.response.door_open;
+  response["currentFloor"] = srv.response.current_floor;
+  response["upDownState"] = srv.response.up_down_state;
+  response["timeStamp"] = ros::Time::now().toSec();
+  return response.dump();
+}
+
+std::string ExClient::HandleLiftDoor(const nlohmann::json &request) {
+  if (!lift_hodor_client_) {
+    return PackMsg(false, "lift hodor client not ready");
+  }
+  lift_comm::Hodor srv;
+  srv.request.hodor = request.value("open", false);
+  if (!lift_hodor_client_.call(srv)) {
+    return PackMsg(false, "lift hodor service call failed");
+  }
+  nlohmann::json response;
+  response["status"] = srv.response.success;
+  response["message"] = srv.response.success ? "lift door ok" : "lift door failed";
+  response["timeStamp"] = ros::Time::now().toSec();
+  return response.dump();
+}
+
+std::string ExClient::HandleWpOccupied() {
+  bool occupied;
+  double age_ms;
+  {
+    std::lock_guard lock(wp_occupied_mutex_);
+    occupied = wp_occupied_;
+    age_ms = wp_occupied_stamp_.isZero()
+                 ? 1e12
+                 : (ros::Time::now() - wp_occupied_stamp_).toSec() * 1000.0;
+  }
+  nlohmann::json response;
+  response["status"] = true;
+  response["message"] = "wp occupied state";
+  response["occupied"] = occupied;
+  response["ageMs"] = age_ms;
   response["timeStamp"] = ros::Time::now().toSec();
   return response.dump();
 }

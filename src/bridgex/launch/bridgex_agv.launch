@@ -20,6 +20,14 @@
     <param name="config_path" value="$(arg config_path)"/>
     <param name="log_dir" value="$(arg log_dir)"/>
 
+    <!-- 梯控可调参数（频率/时间，便于测试调优） -->
+    <param name="elevator_call_rate_hz" value="1.0"/>             <!-- 呼梯频率 -->
+    <param name="elevator_status_query_rate_hz" value="5.0"/>     <!-- 电梯状态查询频率 -->
+    <param name="elevator_judge_start_delay_ms" value="5000"/>    <!-- 到层到开始判断的等待（等门完全打开） -->
+    <param name="elevator_judge_window_ms" value="5000"/>         <!-- 判断窗口长度 -->
+    <param name="elevator_occupied_check_rate_hz" value="10.0"/>  <!-- 判断窗口内采样占据的频率 -->
+    <param name="elevator_wp_occupied_freshness_ms" value="500"/> <!-- 占据消息有效期，超期视为未占据 -->
+
     <node pkg="bridgex" type="bridgex_node" name="bridgex_node" output="screen">
     </node>
 

@@ -170,6 +170,20 @@
             "actions": [
                 {
                     "param": {
+                        "floor": 3,
+                        "mode": "come",
+                        "op": "call"
+                    },
+                    "type": 5
+                },
+                {
+                    "param": {
+                        "op": "open_door"
+                    },
+                    "type": 5
+                },
+                {
+                    "param": {
                         "name": "WP15",
                         "qW": 0.7281490952946658,
                         "qX": 0.0,
@@ -183,6 +197,26 @@
                 },
                 {
                     "param": {
+                        "op": "close_door"
+                    },
+                    "type": 5
+                },
+                {
+                    "param": {
+                        "floor": 1,
+                        "mode": "go",
+                        "op": "call"
+                    },
+                    "type": 5
+                },
+                {
+                    "param": {
+                        "op": "open_door"
+                    },
+                    "type": 5
+                },
+                {
+                    "param": {
                         "name": "WP16",
                         "qW": 0.7474706633068585,
                         "qX": 0.0,
@@ -193,6 +227,12 @@
                         "z": 0.0
                     },
                     "type": 1
+                },
+                {
+                    "param": {
+                        "op": "close_door"
+                    },
+                    "type": 5
                 },
                 {
                     "param": {
