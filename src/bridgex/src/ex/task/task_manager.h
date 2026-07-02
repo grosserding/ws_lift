@@ -211,7 +211,8 @@ class TaskManager {
   double elevator_call_rate_hz_{1.0};            // 呼梯频率
   double elevator_status_query_rate_hz_{5.0};    // 电梯状态查询频率
   int elevator_judge_start_delay_ms_{5000};      // 到层到开始判断的等待（等门完全打开）
-  int elevator_judge_window_ms_{5000};           // 判断窗口长度
+  int elevator_free_confirm_ms_{2000};           // 连续空闲多久判定“可进入”
+  int elevator_max_judge_ms_{8000};              // 最长观察时长，超时仍无连续空闲则判占据放弃
   double elevator_occupied_check_rate_hz_{10.0}; // 判断窗口内采样占据的频率
   int elevator_wp_occupied_freshness_ms_{500};   // /wp_occupied 消息有效期，超期视为未收到
   int elevator_person_count_freshness_ms_{500};  // /yolo/person_count 消息有效期，超期视为未收到

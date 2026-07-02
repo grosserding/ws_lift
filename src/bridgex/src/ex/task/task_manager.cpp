@@ -15,7 +15,8 @@ TaskManager::TaskManager(ExClient& ex_client)
   nh.param("elevator_call_rate_hz", elevator_call_rate_hz_, elevator_call_rate_hz_);
   nh.param("elevator_status_query_rate_hz", elevator_status_query_rate_hz_, elevator_status_query_rate_hz_);
   nh.param("elevator_judge_start_delay_ms", elevator_judge_start_delay_ms_, elevator_judge_start_delay_ms_);
-  nh.param("elevator_judge_window_ms", elevator_judge_window_ms_, elevator_judge_window_ms_);
+  nh.param("elevator_free_confirm_ms", elevator_free_confirm_ms_, elevator_free_confirm_ms_);
+  nh.param("elevator_max_judge_ms", elevator_max_judge_ms_, elevator_max_judge_ms_);
   nh.param("elevator_occupied_check_rate_hz", elevator_occupied_check_rate_hz_, elevator_occupied_check_rate_hz_);
   nh.param("elevator_wp_occupied_freshness_ms", elevator_wp_occupied_freshness_ms_, elevator_wp_occupied_freshness_ms_);
   nh.param("elevator_person_count_freshness_ms", elevator_person_count_freshness_ms_,
@@ -579,8 +580,8 @@ bool TaskManager::ElevatorComeToFloor(int floor, std::string& error_msg) {
       elevator_occupied_check_rate_hz_ > 0 ? static_cast<int>(1000.0 / elevator_occupied_check_rate_hz_) : 100;
 
   LOG(INFO) << "Elevator come: start, target floor " << floor
-            << " (judge_start_delay=" << elevator_judge_start_delay_ms_ << "ms, judge_window="
-            << elevator_judge_window_ms_ << "ms)";
+            << " (judge_start_delay=" << elevator_judge_start_delay_ms_ << "ms, free_confirm="
+            << elevator_free_confirm_ms_ << "ms, max_judge=" << elevator_max_judge_ms_ << "ms)";
   while (is_running_ && !should_cancel_) {
     // 步骤a：呼梯直到电梯到达本层
     if (!ElevatorGoToFloor(floor, error_msg)) {
@@ -597,17 +598,38 @@ bool TaskManager::ElevatorComeToFloor(int floor, std::string& error_msg) {
     // 起始判断时间：等门完全打开
     bool delay_ok = InterruptibleSleep(elevator_judge_start_delay_ms_);
 
-    // 判断窗口：持续采样占据，窗口内出现占据即判定为占据（门保持开到窗口结束）
-    bool occupied = false;
+    // 判断：持续观察，累计“连续空闲”时长；
+    //   连续空闲达到 free_confirm 即判定可进入（过滤路人短暂经过造成的瞬时占据）；
+    //   总观察时长超过 max_judge 仍未凑出连续空闲，则判定占据、放弃本次。
+    bool enterable = false;
     if (delay_ok) {
-      LOG(INFO) << "Elevator come: judging occupancy of cabin waypoint for " << elevator_judge_window_ms_ << "ms";
-      auto window_end = std::chrono::steady_clock::now() + std::chrono::milliseconds(elevator_judge_window_ms_);
-      while (std::chrono::steady_clock::now() < window_end && is_running_ && !should_cancel_) {
-        if (IsWpOccupied()) {
-          if (!occupied) {
-            LOG(INFO) << "Elevator come: cabin waypoint detected OCCUPIED during judge window";
+      LOG(INFO) << "Elevator come: judging occupancy (need " << elevator_free_confirm_ms_
+                << "ms continuous free, give up after " << elevator_max_judge_ms_ << "ms)";
+      auto judge_start = std::chrono::steady_clock::now();
+      auto max_end = judge_start + std::chrono::milliseconds(elevator_max_judge_ms_);
+      auto free_since = judge_start;  // 连续空闲起点
+      bool prev_occupied = false;     // 仅在状态翻转时打印，避免高频刷屏
+      while (is_running_ && !should_cancel_) {
+        bool occ = IsWpOccupied();
+        auto now = std::chrono::steady_clock::now();
+        if (occ) {
+          if (!prev_occupied) {
+            LOG(INFO) << "Elevator come: occupied detected, reset continuous-free timer";
           }
-          occupied = true;
+          free_since = now;  // 出现占据，连续空闲清零
+        } else {
+          if (prev_occupied) {
+            LOG(INFO) << "Elevator come: became free, counting continuous free";
+          }
+          if (now - free_since >= std::chrono::milliseconds(elevator_free_confirm_ms_)) {
+            enterable = true;
+            break;
+          }
+        }
+        prev_occupied = occ;
+        if (now >= max_end) {
+          LOG(INFO) << "Elevator come: max judge time reached without sustained free";
+          break;
         }
         if (!InterruptibleSleep(occ_period_ms)) {
           break;
@@ -615,8 +637,8 @@ bool TaskManager::ElevatorComeToFloor(int floor, std::string& error_msg) {
       }
     }
 
-    // 窗口结束（或被取消）后关门
-    LOG(INFO) << "Elevator come: judge window ended (occupied=" << (occupied ? "true" : "false")
+    // 判断结束（或被取消）后关门
+    LOG(INFO) << "Elevator come: judging ended (enterable=" << (enterable ? "true" : "false")
               << "), closing door";
     if (!SetLiftDoor(false, door_err)) {
       LOG(WARNING) << "Elevator come: close door failed: " << door_err;
@@ -628,7 +650,7 @@ bool TaskManager::ElevatorComeToFloor(int floor, std::string& error_msg) {
       return false;
     }
 
-    if (!occupied) {
+    if (enterable) {
       LOG(INFO) << "Elevator come: floor " << floor << " cabin is enterable, come action done";
       return true;
     }

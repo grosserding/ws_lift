@@ -24,7 +24,8 @@
     <param name="elevator_call_rate_hz" value="1.0"/>             <!-- 呼梯频率 -->
     <param name="elevator_status_query_rate_hz" value="5.0"/>     <!-- 电梯状态查询频率 -->
     <param name="elevator_judge_start_delay_ms" value="5000"/>    <!-- 到层到开始判断的等待（等门完全打开） -->
-    <param name="elevator_judge_window_ms" value="5000"/>         <!-- 判断窗口长度 -->
+    <param name="elevator_free_confirm_ms" value="2000"/>         <!-- 连续空闲多久判定“可进入”（过滤路人瞬时经过） -->
+    <param name="elevator_max_judge_ms" value="8000"/>            <!-- 最长观察时长，超时仍无连续空闲则判占据放弃 -->
     <param name="elevator_occupied_check_rate_hz" value="10.0"/>  <!-- 判断窗口内采样占据的频率 -->
     <param name="elevator_wp_occupied_freshness_ms" value="500"/> <!-- /wp_occupied 消息有效期，超期视为未收到 -->
     <param name="elevator_person_count_freshness_ms" value="500"/> <!-- /yolo/person_count 消息有效期，超期视为未收到 -->
