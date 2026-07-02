@@ -18,6 +18,9 @@ TaskManager::TaskManager(ExClient& ex_client)
   nh.param("elevator_judge_window_ms", elevator_judge_window_ms_, elevator_judge_window_ms_);
   nh.param("elevator_occupied_check_rate_hz", elevator_occupied_check_rate_hz_, elevator_occupied_check_rate_hz_);
   nh.param("elevator_wp_occupied_freshness_ms", elevator_wp_occupied_freshness_ms_, elevator_wp_occupied_freshness_ms_);
+  nh.param("elevator_person_count_freshness_ms", elevator_person_count_freshness_ms_,
+           elevator_person_count_freshness_ms_);
+  nh.param("elevator_enforce_yolo", elevator_enforce_yolo_, elevator_enforce_yolo_);
 }
 
 TaskManager::~TaskManager() { Stop(); }
@@ -484,9 +487,24 @@ bool TaskManager::IsWpOccupied() {
     if (!j.value("status", false)) {
       return false;
     }
-    bool occupied = j.value("occupied", false);
-    double age_ms = j.value("ageMs", 1e12);
-    return occupied && age_ms <= static_cast<double>(elevator_wp_occupied_freshness_ms_);
+    // cond1：/wp_occupied 的原有逻辑（收到且为占据）
+    bool wp_occupied = j.value("occupied", false);
+    double wp_age_ms = j.value("ageMs", 1e12);
+    bool cond1 = wp_occupied && wp_age_ms <= static_cast<double>(elevator_wp_occupied_freshness_ms_);
+
+    // cond2：/yolo/person_count 人数判断
+    int person_count = j.value("personCount", 0);
+    double person_age_ms = j.value("personCountAgeMs", 1e12);
+    bool person_received = person_age_ms <= static_cast<double>(elevator_person_count_freshness_ms_);
+    bool cond2;
+    if (person_received) {
+      cond2 = (person_count != 0);  // 收到：人数非0即占据
+    } else {
+      // 收不到：enforce_yolo=true 判占据，否则判未占据
+      cond2 = elevator_enforce_yolo_;
+    }
+
+    return cond1 || cond2;
   } catch (const nlohmann::json::exception&) {
     return false;
   }

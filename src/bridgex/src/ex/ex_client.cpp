@@ -91,6 +91,8 @@ void ExClient::InitROS() {
   lift_hodor_client_ = nh_.serviceClient<lift_comm::Hodor>("/lift/hodor");
   // 目标点被占据状态
   wp_occupied_sub_ = nh_.subscribe("wp_occupied", 1, &ExClient::WpOccupiedCallback, this);
+  // 电梯内人数（yolo）
+  person_count_sub_ = nh_.subscribe("yolo/person_count", 1, &ExClient::PersonCountCallback, this);
 
   loc_sub_ = nh_.subscribe("odom", 1, &ExClient::LocCallback, this);
   amcl_sub_ = nh_.subscribe("amcl_pose", 1, &ExClient::AmclCallback, this);
@@ -1076,6 +1078,12 @@ void ExClient::WpOccupiedCallback(const std_msgs::Bool::ConstPtr &msg) {
   wp_occupied_stamp_ = ros::Time::now();
 }
 
+void ExClient::PersonCountCallback(const std_msgs::Int32::ConstPtr &msg) {
+  std::lock_guard lock(person_count_mutex_);
+  person_count_ = msg->data;
+  person_count_stamp_ = ros::Time::now();
+}
+
 std::string ExClient::HandleLiftCall(const nlohmann::json &request) {
   if (!lift_call_client_) {
     LOG(ERROR) << "HandleLiftCall: lift call client not ready";
@@ -1150,11 +1158,22 @@ std::string ExClient::HandleWpOccupied() {
                  ? 1e12
                  : (ros::Time::now() - wp_occupied_stamp_).toSec() * 1000.0;
   }
+  int person_count;
+  double person_age_ms;
+  {
+    std::lock_guard lock(person_count_mutex_);
+    person_count = person_count_;
+    person_age_ms = person_count_stamp_.isZero()
+                        ? 1e12
+                        : (ros::Time::now() - person_count_stamp_).toSec() * 1000.0;
+  }
   nlohmann::json response;
   response["status"] = true;
   response["message"] = "wp occupied state";
   response["occupied"] = occupied;
   response["ageMs"] = age_ms;
+  response["personCount"] = person_count;
+  response["personCountAgeMs"] = person_age_ms;
   response["timeStamp"] = ros::Time::now().toSec();
   return response.dump();
 }

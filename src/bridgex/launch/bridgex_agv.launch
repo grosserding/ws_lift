@@ -26,7 +26,9 @@
     <param name="elevator_judge_start_delay_ms" value="5000"/>    <!-- 到层到开始判断的等待（等门完全打开） -->
     <param name="elevator_judge_window_ms" value="5000"/>         <!-- 判断窗口长度 -->
     <param name="elevator_occupied_check_rate_hz" value="10.0"/>  <!-- 判断窗口内采样占据的频率 -->
-    <param name="elevator_wp_occupied_freshness_ms" value="500"/> <!-- 占据消息有效期，超期视为未占据 -->
+    <param name="elevator_wp_occupied_freshness_ms" value="500"/> <!-- /wp_occupied 消息有效期，超期视为未收到 -->
+    <param name="elevator_person_count_freshness_ms" value="500"/> <!-- /yolo/person_count 消息有效期，超期视为未收到 -->
+    <param name="elevator_enforce_yolo" value="true"/>          <!-- 强制要求yolo人数：收不到时 true=判占据 false=判未占据 -->
 
     <node pkg="bridgex" type="bridgex_node" name="bridgex_node" output="screen">
     </node>

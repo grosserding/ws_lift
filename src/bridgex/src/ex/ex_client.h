@@ -26,6 +26,7 @@
 #include <std_srvs/Empty.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Int32.h>
 #include <lift_comm/LiftCall.h>
 #include <lift_comm/StateInquiry.h>
 #include <lift_comm/Hodor.h>
@@ -81,6 +82,11 @@ class ExClient {
   bool wp_occupied_{false};
   ros::Time wp_occupied_stamp_;
   std::mutex wp_occupied_mutex_;
+  // 电梯内人数（yolo 发布 /yolo/person_count），用于占据判断的第二个条件
+  ros::Subscriber person_count_sub_;
+  int person_count_{0};
+  ros::Time person_count_stamp_;
+  std::mutex person_count_mutex_;
   // 定位相关
   ros::Subscriber loc_sub_;
   ros::Subscriber amcl_sub_;
@@ -177,6 +183,8 @@ class ExClient {
   std::string HandleWpOccupied();
 
   void WpOccupiedCallback(const std_msgs::Bool::ConstPtr &msg);
+
+  void PersonCountCallback(const std_msgs::Int32::ConstPtr &msg);
 
   void LocCallback(const nav_msgs::Odometry::ConstPtr &msg);
 
